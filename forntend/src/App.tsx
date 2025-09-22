@@ -8,7 +8,7 @@ function App() {
   const [apiMessage, setApiMessage] = useState<string>('Loading...');
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/')  // Replace with your backend URL
+    fetch('https://aksharastra-oncm.onrender.com/')  // Replace with your backend URL
       .then(async (res) => {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
