@@ -7,13 +7,16 @@ import tempfile
 import os
 import uuid
 
+
 app = FastAPI()
+
 
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://aksharastra.vercel.app",
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,16 +26,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class TextInput(BaseModel):
     text: str
     voice_rate: float = 150
     voice_volume: float = 0.9
+
 
 def remove_file(path: str):
     try:
         os.remove(path)
     except Exception:
         pass
+
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to Aksharastra Backend!"}
+
 
 @app.post("/generate-audio/")
 async def generate_audio(text_input: TextInput, background_tasks: BackgroundTasks):
