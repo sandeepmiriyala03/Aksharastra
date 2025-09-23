@@ -1,22 +1,23 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-// Get the root container element from the HTML
-const container = document.getElementById('app');
+const container = document.getElementById('root');
+if (!container) throw new Error('Root container not found');
 
-if (!container) {
-  throw new Error('Failed to find the root element with id "app"');
-}
-
-// Create React root
 const root = ReactDOM.createRoot(container);
+root.render(<App />);
 
-// Render the React app wrapped with Suspense and StrictMode
-root.render(
-  <React.StrictMode>
-    <Suspense fallback={<div>Loading...</div>}>
-      <App />
-    </Suspense>
-  </React.StrictMode>
-);
+// Register the PWA Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.log('Service Worker registered:', registration);
+      })
+      .catch((error) => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}

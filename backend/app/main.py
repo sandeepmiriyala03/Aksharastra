@@ -1,5 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+import pyttsx3
+import tempfile
+import os
+import uuid
 
 app = FastAPI()
 
@@ -17,6 +23,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Pydantic model for text input
+class TextInput(BaseModel):
+    text: str
+    voice_rate: float = 150
+    voice_volume: float = 0.9
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to Aksharastra Backend!"}
+
+@app.post("/generate-audio/")
+async def generate_audio(text_input: TextInput):
+    try:
+        if not text_input.text.strip():
+            raise HTTPException(status_code=400, detail="Text input cannot be empty")
+        
+        engine = pyttsx3.init()
+        engine.setProperty('rate', text_input.voice_rate)
+        engine.setProperty('volume', text_input.voice_volume)
+        
+        temp_dir = tempfile.gettempdir()
+        audio_filename = f"speech_{uuid.uuid4().hex}.wav"
+        audio_path = os.path.join(temp_dir, audio_filename)
+        
+        engine.save_to_file(text_input.text, audio_path)
+        engine.runAndWait()
+        
+        if not os.path.exists(audio_path):
+            raise HTTPException(status_code=500, detail="Failed to generate audio file")
+        
+        return FileResponse(
+            path=audio_path,
+            media_type='audio/wav',
+            filename=f"aksharastra_speech_{uuid.uuid4().hex[:8]}.wav",
+            headers={"Content-Disposition": "attachment"}
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Audio generation failed: {str(e)}")

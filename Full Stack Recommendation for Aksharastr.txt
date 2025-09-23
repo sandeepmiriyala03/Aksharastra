@@ -1,0 +1,20 @@
+Full Stack Recommendation for Aksharastra Project
+Layer	Technology	Purpose and Benefits
+Frontend	React + TypeScript + Vite	Fast, modern UI development with strong typing for reliability. Vite offers a fast dev/build environment. Supports rich interactivity and audio sync.
+State Management	React Context API or Zustand	Simple and efficient global state management for UI states.
+Styling	Tailwind CSS	Utility-first CSS for rapid, responsive, and consistent styling.
+Backend	FastAPI (Python)	High-performance async API server, great for OCR processing, text handling, and audio services.
+OCR Engine	Tesseract OCR / Google Vision API	Core OCR capabilities for Sanskrit, Telugu, and English document digitization. Google Vision offers higher accuracy but is paid.
+Async Task Queue	Celery + Redis	Offload heavy OCR and audio processing tasks asynchronously for scalability and responsiveness.
+Database	PostgreSQL	Reliable relational DB for user data, document metadata, and annotations with advanced query support.
+Cache	Redis	For fast caching of intermediate OCR results, sessions, and task queue broker.
+Audio Handling	Web Audio API + Howler.js	Frontend audio playback and synchronization with highlighted text.
+Storage	AWS S3 or similar object storage	Store large audio files, scanned documents, and processed assets.
+Search & Indexing	Elasticsearch or Algolia	Enable fast full-text search over digitized content and annotations.
+Deployment Frontend	Vercel	Optimized hosting for React apps with easy GitHub integration and automatic deploys.
+Deployment Backend	Render	Simple, scalable backend hosting with continuous deployment from GitHub and support for async workers.
+Version Control	Git + GitHub	Source control and collaborative development hosted on GitHub.
+Authentication	OAuth2 / JWT + FastAPI Security	Secure user authentication and authorization mechanisms.
+Monitoring & Logging	Sentry + LogRocket	Error monitoring and session replay for frontend and backend robustness.
+Progressive Web App (PWA)	Yes (React PWA)	Offline capabilities and installable app for better accessibility.
+Internationalization (i18n)	react-i18next	Multi-language support for UI in Sanskrit, Telugu, English, etc.
