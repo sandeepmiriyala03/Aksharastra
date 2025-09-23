@@ -13,15 +13,29 @@ export default defineConfig({
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: '#3b82f6'
-    
+        theme_color: '#3b82f6',
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'], // Cache Workbox files too
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
-            urlPattern: new RegExp(`https://aksharastra-oncm\\.onrender\\.com/.*`),
+            urlPattern: /^https:\/\/aksharastra-oncm\.onrender\.com\/.*/,
+            handler: 'NetworkOnly',  // POST requests need NetworkOnly for bg sync
+            method: 'POST',          // Only apply to POST requests
+            options: {
+              backgroundSync: {
+                name: 'post-queue',
+                options: {
+                  maxRetentionTime: 24 * 60, // Retry for max of 24 hours
+                },
+              },
+              networkTimeoutSeconds: 10, // Timeout to decide offline
+            },
+          },
+          {
+            urlPattern: /^https:\/\/aksharastra-oncm\.onrender\.com\/.*/,
             handler: 'NetworkFirst',
+            method: 'GET',
             options: {
               cacheName: 'api-cache',
               expiration: {
@@ -33,7 +47,10 @@ export default defineConfig({
           },
         ],
       },
+      injectManifest: {
+        swSrc: 'src/service-worker.js', // we'll create this below
+      },
     }),
   ],
-  base: '/', // Adjust if deploying to subpath
+  base: '/',
 });

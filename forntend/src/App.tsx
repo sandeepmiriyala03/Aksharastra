@@ -22,6 +22,7 @@ function App() {
       .catch((err) => setApiMessage('Error: ' + err.message));
   }, []);
 
+  // POST request; will be queued by Workbox Background Sync if offline
   const sendText = async () => {
     if (!textInput.trim()) return;
     setLoading(true);
