@@ -20,16 +20,15 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/aksharastra-oncm\.onrender\.com\/.*/,
-            handler: 'NetworkOnly',  // POST requests need NetworkOnly for bg sync
-            method: 'POST',          // Only apply to POST requests
+            handler: 'NetworkOnly',
+            method: 'POST',
             options: {
               backgroundSync: {
                 name: 'post-queue',
                 options: {
-                  maxRetentionTime: 24 * 60, // Retry for max of 24 hours
+                  maxRetentionTime: 24 * 60,
                 },
               },
-              networkTimeoutSeconds: 10, // Timeout to decide offline
             },
           },
           {
@@ -48,7 +47,7 @@ export default defineConfig({
         ],
       },
       injectManifest: {
-        swSrc: 'src/service-worker.js', // we'll create this below
+        swSrc: 'src/service-worker.js',
       },
     }),
   ],
