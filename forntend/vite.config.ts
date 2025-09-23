@@ -14,9 +14,10 @@ export default defineConfig({
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#3b82f6'
-        
+    
       },
       workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'], // Cache Workbox files too
         runtimeCaching: [
           {
             urlPattern: new RegExp(`https://aksharastra-oncm\\.onrender\\.com/.*`),
@@ -25,15 +26,14 @@ export default defineConfig({
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 24 * 60 * 60, // 1 day
+                maxAgeSeconds: 24 * 60 * 60,
               },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],
       },
     }),
   ],
+  base: '/', // Adjust if deploying to subpath
 });
