@@ -30,30 +30,38 @@ function App() {
   }, [audioUrl]);
 
   // Handle audio generation on button click
-  const generateAudio = async () => {
-    if (!textInput.trim()) return;
-    setLoading(true);
-    try {
-      const response = await fetch('https://aksharastra-oncm.onrender.com/generate-audio/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textInput, voice_rate: 150, voice_volume: 0.9 }),
-      });
+const generateAudio = async () => {
+  if (!textInput.trim()) return;
+  setLoading(true);
+  try {
+    const response = await fetch('https://aksharastra-oncm.onrender.com/generate-audio/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: textInput, voice_rate: 150, voice_volume: 0.9 }),
+    });
 
-      if (!response.ok) {
-        const errMsg = await response.text();
-        throw new Error(`Failed to generate audio: ${errMsg || response.statusText}`);
+    if (!response.ok) {
+      // Try to parse and log error text from server response
+      let errMsg = '';
+      try {
+        errMsg = await response.text();
+      } catch (e) {
+        errMsg = 'Unable to parse error response';
       }
-
-      const blob = await response.blob();
-      setAudioUrl(URL.createObjectURL(blob));
-    } catch (error) {
-      alert('Failed to generate audio. Please try again.');
-      console.error('Audio generation error:', error);
-    } finally {
-      setLoading(false);
+      console.error('Generate audio failed:', response.status, response.statusText, errMsg);
+      throw new Error(`Failed to generate audio: ${errMsg || response.statusText}`);
     }
-  };
+
+    const blob = await response.blob();
+    setAudioUrl(URL.createObjectURL(blob));
+  } catch (error) {
+    alert('Failed to generate audio. Please try again.');
+    console.error('Audio generation error:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div style={{ padding: '2rem', maxWidth: 600, margin: '0 auto' }}>
