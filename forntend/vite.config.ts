@@ -17,9 +17,26 @@ export default defineConfig({
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }
-        ]
-      }
-    
-    })
-  ]
+        ],
+      },
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: new RegExp(`https://aksharastra-oncm\\.onrender\\.com/.*`),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 24 * 60 * 60, // 1 day
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
+      },
+    }),
+  ],
 });
