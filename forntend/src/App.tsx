@@ -8,8 +8,24 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
 
+  // For PWA install prompt
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
   useEffect(() => {
     document.title = 'Offline Page';
+
+    // Listen for beforeinstallprompt event
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Cleanup listener
+    return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   useEffect(() => {
@@ -22,7 +38,7 @@ function App() {
       .catch((err) => setApiMessage('Error: ' + err.message));
   }, []);
 
-  // POST request; will be queued by Workbox Background Sync if offline
+  // POST request; will be queued by service worker background sync if offline
   const sendText = async () => {
     if (!textInput.trim()) return;
     setLoading(true);
@@ -48,8 +64,17 @@ function App() {
     }
   };
 
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('User choice:', outcome);
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
+  };
+
   return (
-    <div style={{ padding: '2rem', maxWidth: 600, margin: '0 auto' }}>
+    <div style={{ padding: '2rem', maxWidth: 600, margin: '0 auto', position: 'relative' }}>
       <h1>Offline Page</h1>
       <p>{apiMessage}</p>
 
@@ -78,8 +103,8 @@ function App() {
             fontWeight: 'bold',
             transition: 'background-color 0.3s',
           }}
-          onMouseEnter={e => !loading && (e.currentTarget.style.backgroundColor = '#0056b3')}
-          onMouseLeave={e => !loading && (e.currentTarget.style.backgroundColor = '#007bff')}
+          onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#0056b3')}
+          onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#007bff')}
         >
           {loading ? 'Loading...' : 'Send Text'}
         </button>
@@ -90,6 +115,28 @@ function App() {
           <h3>API Response</h3>
           <p>{responseMessage}</p>
         </div>
+      )}
+
+      {showInstallButton && (
+        <button
+          onClick={handleInstallClick}
+          style={{
+            position: 'fixed',
+            bottom: 20,
+            right: 20,
+            padding: '0.75rem 1.5rem',
+            fontSize: '1rem',
+            borderRadius: 8,
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            zIndex: 1000,
+          }}
+        >
+          Install App
+        </button>
       )}
     </div>
   );
