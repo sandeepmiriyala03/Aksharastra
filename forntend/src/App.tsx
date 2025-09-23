@@ -10,8 +10,9 @@ function App() {
 
   // Fetch backend welcome message on page load
   useEffect(() => {
-    fetch('https://aksharastra.onrender.com/')
+    fetch('https://aksharastra-oncm.onrender.com') 
       .then(async (res) => {
+     console.log(res);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data: ApiResponse = await res.json();
         setApiMessage(data.message);
@@ -35,7 +36,7 @@ function App() {
     try {
      // const localhost='http://localhost:8000';
   
-      const response = await fetch('https://aksharastra.onrender.com/generate-audio/', {
+      const response = await fetch('https://aksharastra-oncm.onrender.com/generate-audio/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: textInput, voice_rate: 150, voice_volume: 0.9 }),
