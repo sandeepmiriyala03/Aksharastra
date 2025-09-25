@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
 
-type ApiResponse = { message: string };
+type ApiResponse = {
+  message?: string;
+  echoed_text?: string;
+  reversed_text?: string;
+  capitalized_text?: string;
+  word_count?: number;
+  tokens?: string[];
+};
 
 function App() {
   const [apiMessage, setApiMessage] = useState('Loading...');
   const [textInput, setTextInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
+  const [apiEndpoint, setApiEndpoint] = useState('/generate-audio/');
 
   // For PWA install prompt
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -15,7 +23,6 @@ function App() {
   useEffect(() => {
     document.title = 'Offline Page';
 
-    // Listen for beforeinstallprompt event
     const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -24,7 +31,6 @@ function App() {
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // Cleanup listener
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
@@ -33,17 +39,25 @@ function App() {
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data: ApiResponse = await res.json();
-        setApiMessage(data.message);
+        setApiMessage(data.message || 'No message');
       })
       .catch((err) => setApiMessage('Error: ' + err.message));
   }, []);
 
-  // POST request; will be queued by service worker background sync if offline
+  // Send request to selected API endpoint
   const sendText = async () => {
     if (!textInput.trim()) return;
     setLoading(true);
+    setResponseMessage(null);
     try {
-      const response = await fetch('https://aksharastra-oncm.onrender.com/generate-audio/', {
+      // Special handling: /word-count/ endpoint supports optional min_length query param
+      let url = `https://aksharastra-oncm.onrender.com${apiEndpoint}`;
+      if (apiEndpoint === '/word-count/') {
+        // Including a min_length=1 as example; you can extend UI to choose this if needed
+        url += '?min_length=1';
+      }
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: textInput }),
@@ -55,7 +69,18 @@ function App() {
       }
 
       const data: ApiResponse = await response.json();
-      setResponseMessage(data.message);
+
+      // Map response fields to a single display message
+      const message =
+        data.message ||
+        data.echoed_text ||
+        data.reversed_text ||
+        data.capitalized_text ||
+        (data.word_count !== undefined ? `Word count: ${data.word_count}` : null) ||
+        (data.tokens ? `Tokens: ${data.tokens.join(', ')}` : null) ||
+        'No response message';
+
+      setResponseMessage(message);
     } catch (error) {
       alert('Failed to fetch API response. Please try again.');
       console.error('API error:', error);
@@ -77,6 +102,24 @@ function App() {
     <div style={{ padding: '2rem', maxWidth: 600, margin: '0 auto', position: 'relative' }}>
       <h1>Offline Page</h1>
       <p>{apiMessage}</p>
+
+      {/* Dropdown to select API endpoint */}
+      <div style={{ marginBottom: 20 }}>
+        <label htmlFor="apiSelect">Choose API Endpoint: </label>
+        <select
+          id="apiSelect"
+          value={apiEndpoint}
+          onChange={(e) => setApiEndpoint(e.target.value)}
+          style={{ marginLeft: 10, padding: 5 }}
+        >
+          <option value="/generate-audio/">Generate Audio</option>
+          <option value="/echo/">Echo Text</option>
+          <option value="/reverse-text/">Reverse Text</option>
+          <option value="/capitalize-text/">Capitalize Text</option>
+          <option value="/word-count/">Word Count</option>
+          <option value="/tokenize/">Tokenize Text</option>
+        </select>
+      </div>
 
       <div style={{ marginTop: '2rem' }}>
         <h2>Enter Text</h2>
