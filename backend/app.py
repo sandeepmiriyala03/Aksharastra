@@ -40,6 +40,7 @@ async def add_vectors_with_text(items: List[VectorWithTextAndID]):
     store vectors in FAISS index and text/ids in memory
     """
     vectors = [item.vector for item in items]
+    
     texts = [item.text for item in items]
     ids = [item.id for item in items]
 
